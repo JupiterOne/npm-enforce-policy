@@ -1,5 +1,26 @@
 #!/usr/bin/env node
 
 'use strict'
-const enforceMaxNPMTokenAge = require('../src/index.js');
-enforceMaxNPMTokenAge(process.argv[2] || 30);
+const {enforceMaxNPMTokenAge, enforceNPMTokenReadOnly} = require('../src/index.js');
+let tokenAge = 30;
+let allowWriteTokens = false;
+
+while (process.argv[2]) {
+  switch (process.argv[2]) {
+    case '--max-age':
+      if (process.argv[3]) {
+        tokenAge = process.argv[3];
+        process.argv.shift();
+      }
+      break;
+    case '--allow-write-tokens':
+      allowWriteTokens = true;
+      break;
+  }
+  process.argv.shift();
+}
+
+enforceMaxNPMTokenAge(tokenAge);
+if (!allowWriteTokens) {
+  enforceNPMTokenReadOnly();
+}

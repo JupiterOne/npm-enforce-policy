@@ -69,7 +69,6 @@ function validateTokenPermissions(policy) {
   tokens.forEach(token => {
     const publishToken = token.readonly === false && token.automation === false;
     const automationToken = token.automation === true;
-    console.log({ token, publishToken, automationToken });
 
     if (publishToken && !policy.allowPublishTokens) {
       token.type = 'publish';

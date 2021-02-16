@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+'use strict';
+const { validateTokenMaxAge, validateTokenPermissions, validateProfile2FASetting } = require('../src/index.js');
+const { parsePolicyFromArgv } = require('../src/helpers');
+
+const policy = parsePolicyFromArgv(process.argv);
+
+
+const valid2FA = validateProfile2FASetting(policy);
+const validAges = validateTokenMaxAge(policy);
+const validPerms = validateTokenPermissions(policy);
+process.exitCode = valid2FA && validAges && validPerms ? 0 : 1;

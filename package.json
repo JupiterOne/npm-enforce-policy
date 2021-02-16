@@ -1,14 +1,14 @@
 {
-  "name": "@jupiterone/npm-enforce-token-policy",
+  "name": "@jupiterone/npm-enforce-policy",
   "version": "1.0.1",
-  "description": "Scan a user's NPM tokens and fail with exit code 1 if any fail to comply with policy.",
-  "repository": "https://github.com/JupiterOne/npm-enforce-token-policy",
+  "description": "Scan a user's NPM tokens and profile and fail with exit code 1 if any fail to comply with policy.",
+  "repository": "https://github.com/JupiterOne/npm-enforce-policy",
   "directories": {
     "src": "./src",
     "bin": "./bin"
   },
   "bin": {
-    "npm-enforce-token-policy": "./bin/npm-enforce-token-policy"
+    "npm-enforce-policy": "./bin/npm-enforce-policy"
   },
   "scripts": {
     "pretest": "yarn lint",

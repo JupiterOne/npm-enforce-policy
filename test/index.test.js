@@ -1,8 +1,8 @@
 'use strict';
-const { validateTokenMaxAge, validateTokenPermissions } = require('../src');
+const { validateTokenMaxAge, validateTokenPermissions, validateProfile2FASetting } = require('../src');
 
 jest.mock('../src/helpers');
-const { fetchNPMTokens } = require('../src/helpers');
+const { fetchNPMTokens, fetch2FASetting } = require('../src/helpers');
 
 function daysAgo(days) {
   return new Date(new Date().setDate(new Date().getDate() - days));
@@ -117,5 +117,34 @@ test('validateTokenPermissions should return true if no tokens violate automatio
     allowPublishTokens: true,
     allowAutomationTokens: false
   })).toBe(true);
+});
+
+test('validateProfile2FASetting should return true if the profile does not violate policy', () => {
+  fetch2FASetting.mockReturnValueOnce('disabled');
+  expect(validateProfile2FASetting({
+    allow2FADisabled: true
+  })).toBe(true);
+
+  fetch2FASetting.mockReturnValueOnce('auth-only');
+  expect(validateProfile2FASetting({
+    allow2FAAuthOnly: true
+  })).toBe(true);
+
+  fetch2FASetting.mockReturnValueOnce('auth-and-writes');
+  expect(validateProfile2FASetting({
+    allow2FAAuthAndWrites: true
+  })).toBe(true);
+});
+
+test('validateProfile2FASetting should return false if npm cannot retrieve profile', () => {
+  fetch2FASetting.mockImplementationOnce(() => {
+    throw new Error('simulated failure');
+  });
+  expect(validateProfile2FASetting({})).toBe(false);
+});
+
+test('validateProfile2FASetting should return false if npm breaks the interface', () => {
+  fetch2FASetting.mockReturnValueOnce('some-new-unaccounted-for-value-from-npm');
+  expect(validateProfile2FASetting({})).toBe(false);
 });
 

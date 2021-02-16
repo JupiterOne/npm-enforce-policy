@@ -1,6 +1,6 @@
 'use strict';
 
-const { fetchNPMTokens } = require('./helpers');
+const { fetchNPMTokens, fetch2FASetting } = require('./helpers');
 
 function validateTokenMaxAge(policy) {
   const maxAgeInSeconds = 60 * 60 * 24 * policy.maxAgeInDays;
@@ -99,4 +99,53 @@ function validateTokenPermissions(policy) {
   return validated;
 }
 
-module.exports = { validateTokenMaxAge, validateTokenPermissions };
+function validateProfile2FASetting(policy) {
+  let setting;
+  // allow policy arg to override default policy
+  const effectivePolicy = Object.assign({
+    allow2FADisabled: false,
+    allow2FAAuthOnly: true,
+    allow2FAAuthAndWrites: true,
+  }, policy);
+
+  try {
+    setting = fetch2FASetting();
+  } catch (err) {
+    console.error(err);
+    console.log('Please login with "npm login".');
+    return false;
+  }
+
+  const safeCoerceToBoolean = (input) => {
+    // user must explicitly use the string 'true' to set allow flags
+    // this is a no-op for boolean values
+    return String(input).toLowerCase() === 'true';
+  };
+
+  let validated = true;
+  switch (setting) {
+    case 'disabled':
+      validated = safeCoerceToBoolean(effectivePolicy.allow2FADisabled);
+      break;
+    case 'auth-only':
+      validated = safeCoerceToBoolean(effectivePolicy.allow2FAAuthOnly);
+      break;
+    case 'auth-and-writes':
+      validated = safeCoerceToBoolean(effectivePolicy.allow2FAAuthAndWrites);
+      break;
+    default:
+      validated = false;
+  }
+
+
+  if (!validated) {
+    console.log('Your npm profile setting of "' + setting + '" for two-factor auth does not comply with policy!');
+    console.log('Please adjust your 2FA settings to meet this policy: ');
+    console.log('allow2FADisabled: ' + effectivePolicy.allow2FADisabled);
+    console.log('allow2FAAuthOnly: ' + effectivePolicy.allow2FAAuthOnly);
+    console.log('allow2FAAuthAndWrites: ' + effectivePolicy.allow2FAAuthAndWrites);
+  }
+  return validated;
+}
+
+module.exports = { validateTokenMaxAge, validateTokenPermissions, validateProfile2FASetting };

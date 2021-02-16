@@ -1,7 +1,7 @@
 {
   "parserOptions": {
     "sourceType": "script",
-    "ecmaVersion": 6,
+    "ecmaVersion": 2018,
     "ecmaFeatures": {
       "impliedStrict": false
     }

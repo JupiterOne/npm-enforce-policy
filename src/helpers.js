@@ -10,30 +10,66 @@ function fetchNPMTokens() {
   return JSON.parse(tokenList);
 }
 
+function fetch2FASetting() {
+  return sh('npm profile get "two-factor auth"').toString().trim();
+}
+
 const defaultPolicy = {
   maxAgeInDays: 30,
   allowPublishTokens: false,
-  allowAutomationTokens: false
+  allowAutomationTokens: false,
+  allow2FADisabled: false,
+  allow2FAAuthOnly: true,
+  allow2FAAuthAndWrites: true
 };
 
 function parsePolicyFromArgv(argv) {
   const policy = Object.assign({}, defaultPolicy);
 
-  let numArg;
+  let nextArg;
   while (argv[2]) {
     switch (argv[2]) {
       case '--max-age':
-        numArg = Number(argv[3]);
-        if (argv[3] && numArg) {
-          policy.maxAgeInDays = numArg;
+        nextArg = Number(argv[3]);
+        if (argv[3] && nextArg) {
+          policy.maxAgeInDays = nextArg;
           argv.shift();
         }
         break;
       case '--allow-publish-tokens':
-        policy.allowPublishTokens = true;
+        if (argv[3]) {
+          nextArg = String(argv[3]).toLowerCase() === 'true';
+          policy.allowPublishTokens = nextArg;
+          argv.shift();
+        }
         break;
       case '--allow-automation-tokens':
-        policy.allowAutomationTokens = true;
+        if (argv[3]) {
+          nextArg = String(argv[3]).toLowerCase() === 'true';
+          policy.allowAutomationTokens = nextArg;
+          argv.shift();
+        }
+        break;
+      case '--allow-2fa-disabled':
+        if (argv[3]) {
+          nextArg = String(argv[3]).toLowerCase() === 'true';
+          policy.allow2FADisabled = nextArg;
+          argv.shift();
+        }
+        break;
+      case '--allow-2fa-auth-only':
+        if (argv[3]) {
+          nextArg = String(argv[3]).toLowerCase() === 'true';
+          policy.allow2FAAuthOnly = nextArg;
+          argv.shift();
+        }
+        break;
+      case '--allow-2fa-auth-and-writes':
+        if (argv[3]) {
+          nextArg = String(argv[3]).toLowerCase() === 'true';
+          policy.allow2FAAuthAndWrites = nextArg;
+          argv.shift();
+        }
         break;
     }
     argv.shift();
@@ -41,4 +77,4 @@ function parsePolicyFromArgv(argv) {
   return policy;
 }
 
-module.exports = { fetchNPMTokens, parsePolicyFromArgv };
+module.exports = { fetchNPMTokens, parsePolicyFromArgv, fetch2FASetting };

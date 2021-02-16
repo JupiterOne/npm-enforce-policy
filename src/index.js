@@ -2,8 +2,8 @@
 
 const fetchNPMTokens = require('./npmTokens');
 
-function enforceMaxNPMTokenAge(days) {
-  const maxAgeInSeconds = 60 * 60 * 24 * days;
+function enforceMaxNPMTokenAge(policy) {
+  const maxAgeInSeconds = 60 * 60 * 24 * policy.maxAgeInDays;
   const expiredTokens = [];
 
   process.exitCode = 0;
@@ -45,10 +45,13 @@ function enforceMaxNPMTokenAge(days) {
   return process.exitCode === 0;
 }
 
-function enforceNPMTokenReadOnly() {
+function enforceNPMTokenPermissions(policy) {
   const illegalTokens = [];
 
   process.exitCode = 0;
+  if (policy.maxAgeInDays === -1) {
+    return true; // skip
+  }
 
   let tokens = [];
   try {
@@ -68,16 +71,26 @@ function enforceNPMTokenReadOnly() {
   }
 
   tokens.forEach(token => {
-    const publishToken = token.readonly === false;
+    const publishToken = token.readonly === false && token.automation === false;
     const automationToken = token.automation === true;
-    if (publishToken && !automationToken) {
+
+    if (publishToken && !policy.allowPublishTokens) {
+      token.type = 'publish';
+      token.violation = 'Publishing tokens are not allowed by policy!';
+      illegalTokens.push(token);
+    }
+
+    if (automationToken && !policy.allowAutomationTokens) {
+      token.type = 'automation';
+      token.violation = 'Automation tokens are not allowed by policy!';
       illegalTokens.push(token);
     }
   });
 
   illegalTokens.forEach(token => {
     const id = token.key.substr(0, 6);
-    console.log('Your npm token with id ' + id + ' is set to read/write! This is against policy.');
+    console.log('Your npm token with id ' + id + ' is of type: ' + token.type + '.');
+    console.log(token.violation);
     console.log('It was created on ' + token.created);
     console.log('Please take the following steps:');
     console.log('1. npm token create --read-only');
@@ -89,4 +102,4 @@ function enforceNPMTokenReadOnly() {
   return process.exitCode === 0;
 }
 
-module.exports = { enforceMaxNPMTokenAge, enforceNPMTokenReadOnly };
+module.exports = { enforceMaxNPMTokenAge, enforceNPMTokenPermissions };

@@ -1,54 +1,11 @@
 'use strict';
 
-const fetchNPMTokens = require('./npmTokens');
+const { fetchNPMTokens } = require('./helpers');
 
-function enforceMaxNPMTokenAge(policy) {
+function validateTokenMaxAge(policy) {
   const maxAgeInSeconds = 60 * 60 * 24 * policy.maxAgeInDays;
   const expiredTokens = [];
 
-  process.exitCode = 0;
-
-  let tokens = [];
-  try {
-    // Prevent Yarn from overriding registry
-    // See https://github.com/yarnpkg/yarn/issues/2935
-    const original_config_registry = process.env['npm_config_registry'];
-    delete process.env['npm_config_registry'];
-
-    tokens = fetchNPMTokens();
-
-    process.env['npm_config_registry'] = original_config_registry;
-  } catch (err) {
-    console.error(err);
-    console.log('Please login with "npm login".');
-    process.exitCode = 1;
-    return false;
-  }
-
-  tokens.forEach(token => {
-    const ageInSeconds = Math.floor((Date.now() - Date.parse(token.created)) / 1000);
-    if (ageInSeconds > maxAgeInSeconds) {
-      expiredTokens.push(token);
-    }
-  });
-
-  expiredTokens.forEach(token => {
-    const id = token.key.substr(0, 6);
-    console.log('Your npm token with id ' + id + ' is too old! It was created on ' + token.created);
-    console.log('Please take the following steps:');
-    console.log('1. npm token create --read-only');
-    console.log('2. Paste this new token into your ~/.npmrc');
-    console.log('3. npm token revoke ' + id);
-    console.log();
-    process.exitCode = 1;
-  });
-  return process.exitCode === 0;
-}
-
-function enforceNPMTokenPermissions(policy) {
-  const illegalTokens = [];
-
-  process.exitCode = 0;
   if (policy.maxAgeInDays === -1) {
     return true; // skip
   }
@@ -66,13 +23,53 @@ function enforceNPMTokenPermissions(policy) {
   } catch (err) {
     console.error(err);
     console.log('Please login with "npm login".');
-    process.exitCode = 1;
+    return false;
+  }
+
+  tokens.forEach(token => {
+    const ageInSeconds = Math.floor((Date.now() - Date.parse(token.created)) / 1000);
+    if (ageInSeconds > maxAgeInSeconds) {
+      expiredTokens.push(token);
+    }
+  });
+
+  let validated = true;
+  expiredTokens.forEach(token => {
+    const id = token.key.substr(0, 6);
+    console.log('Your npm token with id ' + id + ' is too old! It was created on ' + token.created);
+    console.log('Please take the following steps:');
+    console.log('1. npm token create --read-only');
+    console.log('2. Paste this new token into your ~/.npmrc');
+    console.log('3. npm token revoke ' + id);
+    console.log();
+    validated = false;
+  });
+  return validated;
+}
+
+function validateTokenPermissions(policy) {
+  const illegalTokens = [];
+
+  let tokens = [];
+  try {
+    // Prevent Yarn from overriding registry
+    // See https://github.com/yarnpkg/yarn/issues/2935
+    const original_config_registry = process.env['npm_config_registry'];
+    delete process.env['npm_config_registry'];
+
+    tokens = fetchNPMTokens();
+
+    process.env['npm_config_registry'] = original_config_registry;
+  } catch (err) {
+    console.error(err);
+    console.log('Please login with "npm login".');
     return false;
   }
 
   tokens.forEach(token => {
     const publishToken = token.readonly === false && token.automation === false;
     const automationToken = token.automation === true;
+    console.log({ token, publishToken, automationToken });
 
     if (publishToken && !policy.allowPublishTokens) {
       token.type = 'publish';
@@ -87,6 +84,7 @@ function enforceNPMTokenPermissions(policy) {
     }
   });
 
+  let validated = true;
   illegalTokens.forEach(token => {
     const id = token.key.substr(0, 6);
     console.log('Your npm token with id ' + id + ' is of type: ' + token.type + '.');
@@ -97,9 +95,9 @@ function enforceNPMTokenPermissions(policy) {
     console.log('2. Paste this new token into your ~/.npmrc');
     console.log('3. npm token revoke ' + id);
     console.log();
-    process.exitCode = 1;
+    validated = false;
   });
-  return process.exitCode === 0;
+  return validated;
 }
 
-module.exports = { enforceMaxNPMTokenAge, enforceNPMTokenPermissions };
+module.exports = { validateTokenMaxAge, validateTokenPermissions };

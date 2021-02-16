@@ -1,33 +1,11 @@
-#!/usr/bin/env node
+#!/u sr/bin /env node
 
 'use strict'
-const {enforceMaxNPMTokenAge, enforceNPMTokenPermissions} = require('../src/index.js');
+const { validateTokenMaxAge, validateTokenPermissions } = require('../src/index.js');
+const { parsePolicyFromArgv } = require('../src/helpers');
 
-const policy = {
-  maxAgeInDays: 30,
-  allowPublishTokens: false,
-  allowAutomationTokens: false
-};
+const policy = parsePolicyFromArgv(process.argv);
 
-let numArg;
-while (process.argv[2]) {
-  switch (process.argv[2]) {
-    case '--max-age':
-      numArg = Number(process.argv[3]);
-      if (process.argv[3] && numArg) {
-        policy.maxAgeInDays = numArg;
-        process.argv.shift();
-      }
-      break;
-    case '--allow-publish-tokens':
-      policy.allowPublishTokens = true;
-      break;
-    case '--allow-automation-tokens':
-      policy.allowAutomationTokens = true;
-      break;
-  }
-  process.argv.shift();
-}
-
-enforceMaxNPMTokenAge(policy);
-enforceNPMTokenPermissions(policy);
+const validAges = validateTokenMaxAge(policy);
+const validPerms = validateTokenPermissions(policy);
+process.exitCode = validAges && validPerms ? 0 : 1;

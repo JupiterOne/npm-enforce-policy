@@ -41,7 +41,7 @@ npx @jupiterone/npm-enforce-token-policy || exit 1
 For use inside a local NodeJS script, you might do:
 
 ```javascript
-const { enforceMaxNPMTokenAge, enforceNPMTokenPermissions } = require('@jupiterone/npm-enforce-token-policy');
+const { validateTokenMaxAge, validteTokenPermissions } = require('@jupiterone/npm-enforce-token-policy');
 
 const policy = {
   maxAgeInDays: 15,
@@ -49,7 +49,7 @@ const policy = {
   allowAutomationTokens: true
 };
 
-if (!enforceMaxNPMTokenAge(policy) || !enforceNPMTokenPermissions(policy)) {
+if (!validateTokenMaxAge(policy) || !validateTokenPermissions(policy)) {
   return;
 }
 ...rest of script...

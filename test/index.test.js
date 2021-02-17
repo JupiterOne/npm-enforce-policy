@@ -1,8 +1,12 @@
 'use strict';
-const { validateTokenMaxAge, validateTokenPermissions, validateProfile2FASetting } = require('../src');
+const {
+  validateTokenMaxAge,
+  validateTokenPermissions,
+  validateProfile2FASetting,
+  validateBannedUserList } = require('../src');
 
 jest.mock('../src/helpers');
-const { fetchNPMTokens, fetch2FASetting } = require('../src/helpers');
+const { fetchNPMTokens, fetch2FASetting, fetchNPMUser } = require('../src/helpers');
 
 function daysAgo(days) {
   return new Date(new Date().setDate(new Date().getDate() - days));
@@ -146,5 +150,20 @@ test('validateProfile2FASetting should return false if npm cannot retrieve profi
 test('validateProfile2FASetting should return false if npm breaks the interface', () => {
   fetch2FASetting.mockReturnValueOnce('some-new-unaccounted-for-value-from-npm');
   expect(validateProfile2FASetting({})).toBe(false);
+});
+
+fetchNPMUser.mockReturnValue('cicd-automation-user');
+test('validateNPMUser() should return true if no users have been banned by policy', () => {
+  expect(validateBannedUserList({})).toBe(true);
+});
+
+test('validateNPMUser() should return false if user has been banned by policy', () => {
+  expect(validateBannedUserList({
+    bannedUserList: 'cicd-automation-user'
+  })).toBe(false);
+
+  expect(validateBannedUserList({
+    bannedUserList: 'joe'
+  })).toBe(true);
 });
 

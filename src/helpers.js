@@ -14,6 +14,10 @@ function fetch2FASetting() {
   return sh('npm profile get "two-factor auth"').toString().trim();
 }
 
+function fetchNPMUser() {
+  return sh('npm whoami').toString().trim();
+}
+
 const defaultPolicy = {
   maxAgeInDays: 30,
   allowPublishTokens: false,
@@ -71,10 +75,16 @@ function parsePolicyFromArgv(argv) {
           argv.shift();
         }
         break;
+      case '--banned-user-list':
+        if (argv[3]) {
+          nextArg = String(argv[3]);
+          policy.bannedUserList = nextArg;
+          argv.shift();
+        }
     }
     argv.shift();
   }
   return policy;
 }
 
-module.exports = { fetchNPMTokens, parsePolicyFromArgv, fetch2FASetting };
+module.exports = { fetchNPMTokens, parsePolicyFromArgv, fetch2FASetting, fetchNPMUser };

@@ -12,6 +12,7 @@ This is a tool meant to help enforce good security hygiene around NPM tokens by 
 | allow2FADisabled      | false |
 | allow2FAAuthOnly      | true  |
 | allow2FAAuthAndWrites | true  |
+| bannedUserList        | ''    |
 
 To use these defaults, simply do:
 
@@ -55,7 +56,7 @@ const policy = {
   allow2FAAuthAndWrites: false,
 };
 
-if (!validateTokenMaxAge(policy) || !validateTokenPermissions(policy || !validateProfile2FASetting(policy))) {
+if (!validateTokenMaxAge(policy) || !validateTokenPermissions(policy) || !validateProfile2FASetting(policy))) {
   return;
 }
 ...rest of script...
@@ -69,11 +70,14 @@ The `npx` form (as well as the `bin/npm-enforce-policy` script) support the foll
 * `--allow-2fa-disabled <true/false>` will set the policy for allowing 2FA to be disabled for the NPM profile. Default if unset: false
 * `--allow-2fa-auth-only <true/false>` will set the policy for 2FA to allow the value 'auth-only'. Default if unset: true
 * `--allow-2fa-auth-and-writes <true/false>` will set the policy for 2FA to allow the value 'auth-and-writes'. Default if unset: true
+* `--banned-user-list <csv users>` will set the policy to ban specific NPM users. Default if unset: '' (allow all users)
 
 Examples:
 
-`npx @jupiterone/npm-enforce-policy` will prompt to revoke any tokens that are older than 30 days, and any tokens with publishing authority. Additionally, it will prompt the user to enable some flavor of 2FA if it is disabled in their profile.
+1. `npx @jupiterone/npm-enforce-policy` will prompt to revoke any tokens that are older than 30 days, and any tokens with publishing authority. Additionally, it will prompt the user to enable some flavor of 2FA if it is disabled in their profile.
 
-`npx @jupiterone/npm-enforce-policy --max-age 90 --allow-automation-tokens true` will prompt to revoke any tokens that are older than 90 days, as well as any publishing tokens that are not of type automation. Additionally, it will prompt the user to enable some flavor of 2FA if it is disabled in their profile.
+2. `npx @jupiterone/npm-enforce-policy --max-age 90 --allow-automation-tokens true` will prompt to revoke any tokens that are older than 90 days, as well as any publishing tokens that are not of type automation. Additionally, it will prompt the user to enable some flavor of 2FA if it is disabled in their profile.
 
-`npx @jupiterone/npm-enforce-policy --max-age -1 --allow-publish-tokens true --allow-2fa-auth-only false` will allow all tokens, regardless of age, EXCEPT automation tokens. Additionally, it will prompt the user if their 2FA profile setting is anything other than 'auth-and-writes'.
+3. `npx @jupiterone/npm-enforce-policy --max-age -1 --allow-publish-tokens true --allow-2fa-auth-only false` will allow all tokens, regardless of age, EXCEPT automation tokens. Additionally, it will prompt the user if their 2FA profile setting is anything other than 'auth-and-writes'.
+
+4. `npx @jupiterone/npm-enforce-policy --banned-user-list some-cicd-user` As 1. above, but also halt if the cicd user is being used outside of CI/CD.

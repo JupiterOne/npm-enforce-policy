@@ -1,6 +1,6 @@
 'use strict';
 
-const { fetchNPMTokens, fetch2FASetting } = require('./helpers');
+const { fetchNPMTokens, fetch2FASetting, fetchNPMUser } = require('./helpers');
 
 function validateTokenMaxAge(policy) {
   const maxAgeInSeconds = 60 * 60 * 24 * policy.maxAgeInDays;
@@ -148,4 +148,19 @@ function validateProfile2FASetting(policy) {
   return validated;
 }
 
-module.exports = { validateTokenMaxAge, validateTokenPermissions, validateProfile2FASetting };
+function validateBannedUserList(policy) {
+  let validated = true;
+  if (policy.bannedUserList) {
+    const bannedUsers = String(policy.bannedUserList).split(',');
+    const currentUser = fetchNPMUser();
+    if (bannedUsers.includes(currentUser)) {
+      console.log('Your NPM user "' + currentUser + '" is not allowed by policy!');
+      console.log('Please login with an authorized NPM user account and try again.');
+      validated = false;
+    }
+  }
+
+  return validated;
+}
+
+module.exports = { validateTokenMaxAge, validateTokenPermissions, validateProfile2FASetting, validateBannedUserList };

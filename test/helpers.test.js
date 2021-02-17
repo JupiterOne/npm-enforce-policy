@@ -2,7 +2,11 @@
 
 const childProcess = require('child_process');
 childProcess.execSync = jest.fn();
-const { fetchNPMTokens, parsePolicyFromArgv, fetch2FASetting } = require('../src/helpers');
+const {
+  fetchNPMTokens,
+  fetch2FASetting,
+  fetchNPMUser,
+  parsePolicyFromArgv } = require('../src/helpers');
 
 childProcess.execSync.mockReturnValue({
   toString: () => {
@@ -83,10 +87,35 @@ test('should parse process argv into policy overrides', () => {
   expect(parsePolicyFromArgv([
     'node', '.',
     '--max-age',
+  ])).toEqual(defaultPolicy);
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
     '--allow-publish-tokens',
+  ])).toEqual(defaultPolicy);
+
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
     '--allow-automation-tokens',
+  ])).toEqual(defaultPolicy);
+
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
+    '--max-age',
     '--allow-2fa-disabled',
+  ])).toEqual(defaultPolicy);
+
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
     '--allow-2fa-auth-only',
+  ])).toEqual(defaultPolicy);
+
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
     '--allow-2fa-auth-and-writes',
   ])).toEqual(defaultPolicy);
 
@@ -98,9 +127,28 @@ test('should parse process argv into policy overrides', () => {
     ...defaultPolicy,
     allowPublishTokens: true
   });
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
+    '--banned-user-list',
+    'foo,bar,joe'
+  ])).toEqual({
+    ...defaultPolicy,
+    bannedUserList: 'foo,bar,joe'
+  });
+
+  expect(parsePolicyFromArgv([
+    'node', '.',
+    '--banned-user-list'
+  ])).toEqual(defaultPolicy);
 });
 
-test('should fetch 2FA setting from online profile', () => {
+test('fetch2FASetting() should fetch 2FA setting from online profile', () => {
   childProcess.execSync.mockReturnValueOnce('disabled');
   expect(fetch2FASetting()).toEqual('disabled');
+});
+
+test('fetchNPMUser() should fetch currently logged-in user', () => {
+  childProcess.execSync.mockReturnValueOnce('someuser');
+  expect(fetchNPMUser()).toEqual('someuser');
 });

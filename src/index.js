@@ -39,8 +39,8 @@ function validateTokenMaxAge(policy) {
     console.log('Your npm token with id ' + id + ' is too old! It was created on ' + token.created);
     console.log('Please take the following steps:');
     console.log('1. npm token create --read-only');
-    console.log('2. Paste this new token into your ~/.npmrc');
-    console.log('3. npm token revoke ' + id);
+    console.log('2. npm token revoke ' + id);
+    console.log('3. Paste the new token from step 1 into your ~/.npmrc');
     console.log();
     validated = false;
   });

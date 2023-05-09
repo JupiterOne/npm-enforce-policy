@@ -39,8 +39,8 @@ function validateTokenMaxAge(policy) {
     console.log('Your npm token with id ' + id + ' is too old! It was created on ' + token.created);
     console.log('Please take the following steps:');
     console.log('(note - use your authenticator to retrieve your 2fa token)');
-    console.log('1. npm login --otp=2FA_token');
-    console.log('2. npm token create --read-only --otp=2FA_token');
+    console.log('1. npm login --otp=<your_2FA_token>');
+    console.log('2. npm token create --read-only --otp=<your_2FA_token>');
     console.log('3. npm token revoke ' + id);
     console.log('4. Paste the new token from step 1 into your ~/.npmrc');
     console.log();

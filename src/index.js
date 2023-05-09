@@ -42,7 +42,7 @@ function validateTokenMaxAge(policy) {
     console.log('1. npm login --otp=<your_2FA_token>');
     console.log('2. npm token create --read-only --otp=<your_2FA_token>');
     console.log('3. npm token revoke ' + id + ' --otp=<your_2FA_token>');
-    console.log('4. Paste the new token from step 1 into your ~/.npmrc');
+    console.log('4. Paste the new token from step 2 into your ~/.npmrc');
     console.log();
     validated = false;
   });

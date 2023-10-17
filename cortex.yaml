@@ -1,0 +1,14 @@
+openapi: 3.0.1
+info:
+  title: '@jupiterone/npm-enforce-policy'
+  description: >-
+    Scan a user's NPM tokens and profile and fail with exit code 1 if any fail
+    to comply with policy.
+  x-cortex-git:
+    github:
+      repository: JupiterOne/npm-enforce-policy
+  x-cortex-owners:
+    - type: group
+      name: JupiterOne/security
+  x-cortex-service-groups: tier-4
+  x-cortex-tag: '@jupiterone/npm-enforce-policy'

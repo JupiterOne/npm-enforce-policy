@@ -2,7 +2,11 @@
   "name": "@jupiterone/npm-enforce-policy",
   "version": "1.2.1",
   "description": "Scan a user's NPM tokens and profile and fail with exit code 1 if any fail to comply with policy.",
-  "repository": "https://github.com/JupiterOne/npm-enforce-policy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JupiterOne/npm-enforce-policy"
+  },
+  "license": "MPL-2.0",
   "directories": {
     "src": "./src",
     "bin": "./bin"
@@ -15,7 +19,6 @@
     "test": "jest --silent",
     "lint": "eslint --ignore-path .gitignore ."
   },
-  "license": "MPL-2.0",
   "devDependencies": {
     "eslint": "^7.20.0",
     "jest": "^26.6.3"

@@ -10,5 +10,6 @@ info:
   x-cortex-owners:
     - type: group
       name: JupiterOne/security
-  x-cortex-service-groups: tier-4
   x-cortex-tag: '@jupiterone/npm-enforce-policy'
+  x-cortex-service-groups:
+    - tier-4
